@@ -9,7 +9,9 @@ from .transformation import Transformation
 from .viewport import Viewport
 from .handle import Selectable
 
-
+'''
+tools are stateless. do one thing.
+'''
 
 class EditTool:
     """Base class for editor tools using State pattern"""
@@ -51,6 +53,9 @@ class EditTool:
 
 
 class ToolController:
+    '''
+    tool applier
+    '''
     def __init__(self, context: Viewport, default_tool: EditTool):
         self.context = context
         self.current_tool = default_tool
@@ -143,6 +148,3 @@ class HandTool(EditTool):
         """stop panning"""
 
 
-class ZoomTool(EditTool):
-    def handle_mouse_scroll(self, context, event):
-        context.zoom_by_point(event.y)

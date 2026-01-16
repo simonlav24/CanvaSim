@@ -6,10 +6,12 @@ from pygame import Vector2
 
 from . import world_globals
 from .edit_tool import EditTool, SelectTool, ToolController, HandTool
+from .tool_rule_engine import ToolRuleEngine
 from .transformation import Transformation
 from .viewport import Viewport
 from .draw_utils import draw_axis, draw_grid
 from .element import Element, Database
+from .predefined_rule_set import editor_tool_set
 
 class WorldCanvas:
     def __init__(self):
@@ -22,7 +24,11 @@ class WorldCanvas:
         self.viewport = Viewport(self.world_transform, self.database)
 
         self.tool_controller: ToolController = ToolController(self.viewport, SelectTool())
+        self.tool_engine = ToolRuleEngine(self.viewport, self.tool_controller)
 
+        # default tool set - editor
+        for rule in editor_tool_set():
+            self.tool_engine.add_rule(rule)
 
     def initialize(self, width, height):
         world_globals.initialize(width, height)
@@ -34,6 +40,7 @@ class WorldCanvas:
         self.database.elements.append(element)
 
     def handle_event(self, event) -> None:
+        self.tool_engine.handle_event(event)
         self.tool_controller.handle_event(event)
 
     def step(self) -> None:

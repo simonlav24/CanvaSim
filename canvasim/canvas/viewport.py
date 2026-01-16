@@ -32,6 +32,11 @@ class Viewport:
         # Adjust position so the world point stays under the mouse
         self.world_transform.pos = world_pos - mouse_pos / self.world_transform.scale
 
+    def pan(self, is_vertical: bool, amount: float) -> None:
+        direction = 1 if is_vertical else 0
+        self.world_transform.pos[direction] += amount * 50 / self.world_transform.scale
+
+
 
     def step(self) -> None:
         ...
