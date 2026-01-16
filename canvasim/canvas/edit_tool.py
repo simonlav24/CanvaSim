@@ -10,34 +10,35 @@ from .viewport import Viewport
 from .handle import Selectable
 
 
-class SelectToolMode(Enum):
-    HANDLE = 0
-    ELEMENT = 1
 
 class EditTool:
     """Base class for editor tools using State pattern"""
-    def __init__(self, context: Viewport):
-        self.viewport = context
+    def __init__(self):
+        ...
 
-    def handle_mouse_down(self, event) -> 'EditTool':
+    def handle_mouse_down(self, context: Viewport, event) -> None:
         """Handles mouse button down event"""
-        return self
 
-    def handle_mouse_up(self, event) -> 'EditTool':
+    def handle_mouse_up(self, context: Viewport, event) -> None:
         """Handles mouse button up event"""
-        return self
 
-    def handle_mouse_motion(self, event) -> 'EditTool':
+    def handle_mouse_motion(self, context: Viewport, event) -> None:
         """Handles mouse motion event"""
-        return self
 
-    def handle_key_down(self, event) -> 'EditTool':
+    def handle_key_down(self, context: Viewport, event) -> None:
         """Handles key down event"""
-        return self
 
-    def handle_key_up(self, event) -> 'EditTool':
+    def handle_key_up(self, context: Viewport, event) -> None:
         """Handles key up event"""
-        return self
+
+    def handle_mouse_scroll(self, context: Viewport, event) -> None:
+        """Handles key up event"""
+
+    def on_activate(self, context: Viewport) -> None:
+        ...
+    
+    def on_deactivate(self, context: Viewport) -> None:
+        ...
 
     def step(self) -> None:
         """Updates tool state each frame"""
@@ -47,40 +48,67 @@ class EditTool:
         """Draws tool-specific overlays"""
         ...
 
+
+
+class ToolController:
+    def __init__(self, context: Viewport, default_tool: EditTool):
+        self.context = context
+        self.current_tool = default_tool
+        self.stack: list[EditTool] = []
+
+    def set_tool(self, tool: EditTool):
+        self.current_tool.on_deactivate(self.context)
+        self.current_tool = tool
+        tool.on_activate(self.context)
+
+    def push_tool(self, tool):
+        self.stack.append(self.current_tool)
+        self.set_tool(tool)
+
+    def pop_tool(self):
+        self.set_tool(self.stack.pop())
+
+    def handle_event(self, event) -> None:
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            self.current_tool.handle_mouse_down(self.context, event)
+
+        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            self.current_tool.handle_mouse_up(self.context, event)
+
+        if event.type == pygame.MOUSEMOTION:
+            self.current_tool.handle_mouse_motion(self.context, event)
+
+        if event.type == pygame.KEYDOWN:
+            self.current_tool.handle_key_down(self.context, event)
+
+        if event.type == pygame.KEYUP:
+            self.current_tool.handle_key_up(self.context, event)
+
+        if event.type == pygame.MOUSEWHEEL:
+            self.current_tool.handle_mouse_scroll(self.context, event)
+
+
+    def step(self) -> None:
+        self.current_tool.step()
+    
+    def draw(self, win: pygame.Surface, transform: Transformation) -> None:
+        self.current_tool.draw(win, transform)
+
+
+
 class SelectTool(EditTool):
     """Default tool state for hovering and detection handles"""
-    def __init__(self, viewport: Viewport):
-        super().__init__(viewport)
-        self.clicked_on_empty_space = False
-        self.hovered: Selectable = None
-        self.mode = SelectToolMode.HANDLE
 
-    def handle_mouse_down(self, event) -> 'EditTool':
+    def handle_mouse_down(self, context: Viewport, event) -> 'EditTool':
         """Determines next tool based on what was clicked"""
-        self.clicked_on_empty_space = False
-        next_tool = self
-
-        if self.hovered:
-            next_tool = DragElementTool(self.viewport, self.hovered)
-        
-        else:
-            # click in empty space
-            self.clicked_on_empty_space = True
-            next_tool = HandTool(self.viewport)
-
-        return next_tool
-
-    def step(self):
-        """Updates hover detection each frame"""
-        mouse_in_world = self.viewport.world_transform.transform_back(Transformation(Vector2(pygame.mouse.get_pos()))).pos
-        if self.mode == SelectToolMode.HANDLE:
-            self.hovered = self.viewport.get_handle_at(mouse_in_world)
-        else:
-            self.hovered = self.viewport.get_element_at(mouse_in_world)
+        ...
 
     def draw(self, win: pygame.Surface, transform: Transformation) -> None:
-        if self.mode == SelectToolMode.HANDLE and self.hovered:
-            self.hovered.draw(win, transform)
+        ...
+        # if self.mode == SelectToolMode.HANDLE and self.hovered:
+        #     self.hovered.draw(win, transform)
+
+    
 
 
 
@@ -106,14 +134,15 @@ class DragElementTool(EditTool):
 
 class HandTool(EditTool):
     """Handles canvas panning"""
-    def __init__(self, context):
-        super().__init__(context)
 
-    def handle_mouse_motion(self, event):
+    def handle_mouse_motion(self, context: Viewport, event):
         """Pans the canvas"""
-        self.viewport.world_transform.pos -= Vector2(event.rel) * 1 / self.viewport.world_transform.scale
-        return self
+        context.world_transform.pos -= Vector2(event.rel) * 1 / context.world_transform.scale
 
-    def handle_mouse_up(self, event):
+    def handle_mouse_up(self, context: Viewport, event):
         """stop panning"""
-        return SelectTool(self.viewport)
+
+
+class ZoomTool(EditTool):
+    def handle_mouse_scroll(self, context, event):
+        context.zoom_by_point(event.y)

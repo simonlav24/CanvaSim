@@ -5,7 +5,7 @@ import pygame
 from pygame import Vector2
 
 from . import world_globals
-from .edit_tool import EditTool, SelectTool
+from .edit_tool import EditTool, SelectTool, ToolController, HandTool
 from .transformation import Transformation
 from .viewport import Viewport
 from .draw_utils import draw_axis, draw_grid
@@ -21,10 +21,8 @@ class WorldCanvas:
 
         self.viewport = Viewport(self.world_transform, self.database)
 
-        self.default_tool = SelectTool
-        self.tool: EditTool = self.default_tool(self.viewport)
+        self.tool_controller: ToolController = ToolController(self.viewport, SelectTool())
 
-        self.assigned_tools: dict[int, Any] = {}
 
     def initialize(self, width, height):
         world_globals.initialize(width, height)
@@ -36,32 +34,10 @@ class WorldCanvas:
         self.database.elements.append(element)
 
     def handle_event(self, event) -> None:
-        self.viewport.handle_event(event)
-
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            self.tool = self.tool.handle_mouse_down(event)
-
-        if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-            self.tool = self.tool.handle_mouse_up(event)
-
-        if event.type == pygame.MOUSEMOTION:
-            self.tool = self.tool.handle_mouse_motion(event)
-
-        if event.type == pygame.KEYDOWN:
-            if event.key in self.assigned_tools.keys():
-                self.tool = self.assigned_tools[event.key]()
-                print(self.tool)
-            else:
-                self.tool = self.tool.handle_key_down(event)
-
-        if event.type == pygame.KEYUP:
-            self.tool = self.tool.handle_key_up(event)
-
-        if self.tool is None:
-            self.tool = self.default_tool(self.viewport)
+        self.tool_controller.handle_event(event)
 
     def step(self) -> None:
-        self.tool.step()
+        self.tool_controller.step()
         self.viewport.step()
 
     def draw(self) -> None:
@@ -73,11 +49,8 @@ class WorldCanvas:
         for element in self.database.elements:
             element.draw(self.win, self.world_transform)
 
-        self.tool.draw(self.win, self.world_transform)
+        self.tool_controller.draw(self.win, self.world_transform)
         self.viewport.draw(self.win, self.world_transform)
-
-    def assign_tool(self, key: int, tool_cls: Any) -> None:
-        self.assigned_tools[key] = lambda: tool_cls(self.viewport)
 
     def main_loop(self):
         done = False

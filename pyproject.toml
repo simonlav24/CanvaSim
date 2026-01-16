@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "canvasim"
 description = "A canvas library with GUI elements for creating interactive applications"
-version = "0.1.0"
+version = "0.2.0"
 authors = [
     {name = "Simon Lab"},
 ]

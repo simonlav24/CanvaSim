@@ -18,20 +18,20 @@ class Viewport:
         self.hovered_handle: Handle = None
         self.hovered_element: Element = None
 
-    def handle_event(self, event) -> None:
-        if event.type == pygame.MOUSEWHEEL:
-            mouse_pos = Vector2(pygame.mouse.get_pos())
-            # Convert mouse position to world coordinates before zoom
-            world_pos = self.world_transform.pos + mouse_pos / self.world_transform.scale
-            
-            # Apply zoom
-            if event.y > 0:
-                self.world_transform.scale *= 1.1
-            else:
-                self.world_transform.scale *= 0.9
-            
-            # Adjust position so the world point stays under the mouse
-            self.world_transform.pos = world_pos - mouse_pos / self.world_transform.scale
+    def zoom_by_point(self, amount: float) -> None:
+        mouse_pos = Vector2(pygame.mouse.get_pos())
+        # Convert mouse position to world coordinates before zoom
+        world_pos = self.world_transform.pos + mouse_pos / self.world_transform.scale
+        
+        # Apply zoom
+        if amount > 0:
+            self.world_transform.scale *= 1.1
+        else:
+            self.world_transform.scale *= 0.9
+        
+        # Adjust position so the world point stays under the mouse
+        self.world_transform.pos = world_pos - mouse_pos / self.world_transform.scale
+
 
     def step(self) -> None:
         ...

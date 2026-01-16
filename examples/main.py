@@ -1,25 +1,29 @@
 
 
 from random import randint, choice
+import sys
+from pathlib import Path
+
+# Add parent directory to path so we can import canvasim
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pygame
 from pygame import Vector2
 
-from canvasim.canvas import WorldCanvas
-from canvasim.canvas import RectanglarSurfElement, TokenElement
-from canvasim.shapes import Polygon, PolygonTool, Rectangle
-from canvasim.gui import GuiContext, Label, Button, ToggleButton
 
-image_background = ...
-image_token = ...
+from canvasim import WorldCanvas
+from canvasim import RectanglarSurfElement, TokenElement
+from canvasim import Polygon, PolygonTool, Rectangle
+from canvasim import GuiContext, Label, Button, ToggleButton
+
+
+image_background = r'../../dnd-vtt/assets/images/background.png'
+image_token = r'../../dnd-vtt/assets/tokens/Token-Character-Monk-Male.png'
 
 def main():
-
     context = WorldCanvas()
     width, height = 1280, 720
     context.initialize(width, height)
-
-    context.assign_tool(pygame.K_p, PolygonTool)
 
     elements = [
         RectanglarSurfElement(pygame.image.load(image_background)),
@@ -46,7 +50,6 @@ def main():
         [Label('label3:'), Button('button3', key='button3')],
         [Label('label3:'), ToggleButton('selected', key='button3')],
     ])
-
 
     clock = pygame.time.Clock()
 
