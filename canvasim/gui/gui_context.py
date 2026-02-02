@@ -60,7 +60,7 @@ class GuiContext:
             if output_event is not None:
                 self.gui_events.append(output_event)
 
-                # Handle radio button logic
+                # PointHandle radio button logic
                 if output_event.type == GuiEventType.RADIO_BUTTON_CLICK:
                     group = self.radio_groups.get(output_event.caller.group, [])
                     is_any_updated = False

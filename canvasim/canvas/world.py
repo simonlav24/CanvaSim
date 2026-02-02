@@ -13,6 +13,7 @@ from .draw_utils import draw_axis, draw_grid
 from .element import Element, Database
 from .predefined_rule_set import editor_tool_set
 
+
 class WorldCanvas:
     def __init__(self):
         self.win: pygame.Surface = None
@@ -27,8 +28,7 @@ class WorldCanvas:
         self.tool_engine = ToolRuleEngine(self.viewport, self.tool_controller)
 
         # default tool set - editor
-        for rule in editor_tool_set():
-            self.tool_engine.add_rule(rule)
+        self.tool_engine.set_rules(editor_tool_set())
 
     def initialize(self, width, height):
         world_globals.initialize(width, height)
@@ -40,12 +40,12 @@ class WorldCanvas:
         self.database.elements.append(element)
 
     def handle_event(self, event) -> None:
+        self.viewport.handle_event(event)
         self.tool_engine.handle_event(event)
         self.tool_controller.handle_event(event)
 
     def step(self) -> None:
         self.tool_controller.step()
-        self.viewport.step()
 
     def draw(self) -> None:
         self.win.fill((30, 30, 30))

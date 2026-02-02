@@ -4,7 +4,7 @@
 import pygame
 from pygame import Vector2
 
-from ..canvas import Element, Transformation, Handle
+from ..canvas import Element, Transformation, PointHandle
 
 class Rectangle(Element):
     def __init__(self, color: pygame.Color, point1: Vector2, point2: Vector2):

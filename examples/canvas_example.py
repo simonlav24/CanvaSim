@@ -10,14 +10,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import pygame
 from pygame import Vector2
 
-
 from canvasim import WorldCanvas
-from canvasim import RectanglarSurfElement, TokenElement
-from canvasim import Polygon, PolygonTool, Rectangle
-
-from canvasim.canvas.tool_rules import MouseUpPopRule, DragEmptyCanvasRule, KeyboardZoomRule
-
-from canvasim.canvas.tool_rule_engine import ToolRule, ToolRuleEngine
+from canvasim import SurfElement
+from canvasim import Polygon, Rectangle
 
 
 image_background = r'../../dnd-vtt/assets/images/background.png'
@@ -29,19 +24,19 @@ def main():
     context.initialize(width, height)
 
     elements = [
-        RectanglarSurfElement(pygame.image.load(image_background)),
+        SurfElement(pygame.image.load(image_background)),
     ]
 
     for _ in range(10):
-        elements.append(token := TokenElement(pygame.image.load(image_token)))
-        token.transformation.pos = Vector2(randint(0, width), randint(0, height))
+        elements.append(token := SurfElement(pygame.image.load(image_token)))
+        token.transformation.set_pos(Vector2(randint(0, width), randint(0, height)))
 
-    elements.append(Polygon((255, 255, 255), [
-        Vector2(0, 0),
-        Vector2(0, 100),
-        Vector2(200, 100),
-    ]))
-    elements.append(Rectangle((255, 255, 255), Vector2(100, 100), Vector2(200, 400)))
+    # elements.append(Polygon((255, 255, 255), [
+    #     Vector2(0, 0),
+    #     Vector2(0, 100),
+    #     Vector2(200, 100),
+    # ]))
+    # elements.append(Rectangle((255, 255, 255), Vector2(100, 100), Vector2(200, 400)))
     [context.add_element(element) for element in elements]
 
     context.main_loop()

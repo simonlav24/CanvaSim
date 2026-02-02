@@ -12,7 +12,7 @@ from pygame import Vector2
 
 
 from canvasim import WorldCanvas
-from canvasim import RectanglarSurfElement, TokenElement
+from canvasim import SurfElement, TokenElement
 from canvasim import Polygon, PolygonTool, Rectangle
 from canvasim import GuiContext, Label, Button, ToggleButton
 
@@ -26,12 +26,12 @@ def main():
     context.initialize(width, height)
 
     elements = [
-        RectanglarSurfElement(pygame.image.load(image_background)),
+        SurfElement(pygame.image.load(image_background)),
     ]
 
     for _ in range(10):
         elements.append(token := TokenElement(pygame.image.load(image_token)))
-        token.transformation.pos = Vector2(randint(0, width), randint(0, height))
+        token.transformation.set_pos(Vector2(randint(0, width), randint(0, height)))
 
     elements.append(Polygon((255, 255, 255), [
         Vector2(0, 0),
